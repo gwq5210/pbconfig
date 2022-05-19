@@ -1,0 +1,8 @@
+{
+  "name": "gwq",
+  "age": 29,
+  "address": {
+    "province": "henan"
+  },
+  "phone_number": ["1", "2"]
+}

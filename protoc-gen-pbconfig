@@ -1,0 +1,24 @@
+#!/usr/bin/python3
+
+import sys
+
+try:
+    import pbconfig_plugin.protoc_gen_pbconfig
+except ImportError as e:
+    print("""\
+There was a problem importing one of the Python modules
+required to run protoc-gen-pbconfig. The error leading to this problem was:
+
+   %s
+
+Please install a package which provides this module, or
+verify that the module is installed correctly.
+
+It's possible that the above module doesn't match the
+current version of Python, which is:
+%s
+
+""" % (e, sys.version), file=sys.stderr)
+    sys.exit(1)
+
+pbconfig_plugin.protoc_gen_pbconfig.main()
