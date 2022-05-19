@@ -93,11 +93,11 @@ class ConfigGenerator():
         self.response = plugin.CodeGeneratorResponse()
 
 
-    def get_type_name(self, field_info: FieldDescriptorProto) -> str:
+    def get_define_type_name(self, field_info: FieldDescriptorProto) -> str:
         type_name = ''
         type_name = cpp_types[field_info.type]
         if field_info.type == FieldDescriptorProto.TYPE_MESSAGE:
-            type_name = field_info.type_name.replace(".", "::")
+            type_name = self.get_field_full_type_name(field_info)
         if field_info.label == FieldDescriptorProto.LABEL_REPEATED:
             type_name = f'std::vector<{type_name}>'
         return type_name
@@ -106,7 +106,7 @@ class ConfigGenerator():
         return default_values[field_info.type]
 
     def generate_field(self, proto_file: FileDescriptorProto, message_info: DescriptorProto, field_info: FieldDescriptorProto) -> str:
-        type_name = self.get_type_name(field_info)
+        type_name = self.get_define_type_name(field_info)
         default_value = self.get_default_value(field_info)
         if default_value:
             field_str = f'  {type_name} {field_info.name} = {default_value};'

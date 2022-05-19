@@ -11,4 +11,5 @@ message Person {
   int32 age = 2;
   Address address = 3;
   repeated string phone_number = 4;
+  repeated Address address_list = 5;
 }

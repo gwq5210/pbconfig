@@ -34,6 +34,8 @@ class TypeInfo {
     field_infos_by_name_.clear();
   }
 
+  std::size_t FieldCount() const { return field_infos_.size(); }
+
   bool AddFieldInfo(const std::string& name, const FieldInfo* field_info) {
     assert(field_info);
     assert(field_infos_.size() == field_infos_by_name_.size());
