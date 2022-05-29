@@ -3,7 +3,6 @@
 #include <string>
 
 #include "file_type.h"
-#include "type_info_manager.h"
 
 namespace pbconfig {
 
@@ -25,8 +24,6 @@ class PbConfig : public Config {
   const std::string& full_type_name() const { return full_type_name_; }
   void set_full_type_name(const std::string& full_type_name) { full_type_name_ = full_type_name; }
   void set_full_type_name(std::string&& full_type_name) { full_type_name_ = std::move(full_type_name); }
-
-  const TypeInfo* GetTypeInfo() const { return TypeInfoManager::GetInstance().GetTypeInfo(full_type_name()); }
 
   virtual bool Parse(const std::string& filename, FileType file_type = FileType::kAutoDetect) override final;
 

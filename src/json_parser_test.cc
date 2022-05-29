@@ -2,17 +2,28 @@
 
 #include "proto/person.cfg.h"
 #include "json_parser.h"
+#include "io_util.h"
 
 TEST(JsonParserTest, JsonParserTest) {
   Person person;
   {
-    person.Parse("testdata/person.json");
-    EXPECT_EQ(person.name, "gwq");
-    EXPECT_EQ(person.age, 29);
-    EXPECT_EQ(person.address.province, "henan");
-    printf("name %s, age %d, province: %s, phone_number_size: %zu\n", person.name.c_str(), person.age, person.address.province.c_str(), person.phone_number.size());
-    ASSERT_EQ(person.phone_number.size(), 2);
-    EXPECT_EQ(person.phone_number[0], "1");
-    EXPECT_EQ(person.phone_number[1], "2");
+    rapidjson::Document json_config;
+    std::string json_content = pbconfig::ReadFile("testdata/person.json");
+    json_config.Parse(json_content);
+    ASSERT_TRUE(!json_config.HasParseError());
+    pbconfig::JsonParser::Parse(json_config, "name", person.name);
+    pbconfig::JsonParser::Parse(json_config, "age", person.age);
+    pbconfig::JsonParser::Parse(json_config, "address", person.address);
+    pbconfig::JsonParser::Parse(json_config, "phone_number", person.phone_number);
+    pbconfig::JsonParser::Parse(json_config, "address_list", person.address_list);
+    fmt::print("name {}\n", person.name);
+    fmt::print("age {}\n", person.age);
+    fmt::print("province {}\n", person.address.province);
+    for (auto& number : person.phone_number) {
+      fmt::print("phone_number {}\n", number);
+    }
+    for (auto& address : person.address_list) {
+      fmt::print("address {}\n", address.province);
+    }
   }
 }

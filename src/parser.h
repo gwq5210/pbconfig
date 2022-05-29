@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #include "config.h"
 
@@ -8,7 +10,7 @@ namespace pbconfig {
 
 class Parser {
  public:
-  virtual bool Parse(const std::string& filename, PbConfig& config) const = 0;
+  virtual bool Parse(const std::string& filename, PbConfig& config) const { return false; }
 
   const std::string &name() const { return name_; }
   void set_name(const std::string& name) { name_ = name; }
