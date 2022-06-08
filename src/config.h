@@ -6,6 +6,14 @@
 
 namespace pbconfig {
 
+template <typename T>
+struct FieldType {
+  static constexpr bool value = std::is_same<int32_t, T>::value || std::is_same<uint32_t, T>::value ||
+                                std::is_same<int64_t, T>::value || std::is_same<uint64_t, T>::value ||
+                                std::is_same<float, T>::value || std::is_same<double, T>::value ||
+                                std::is_same<std::string, T>::value || std::is_same<bool, T>::value;
+};
+
 class Config {
  public:
   virtual ~Config() {}
@@ -14,7 +22,8 @@ class Config {
 
 class PbConfig : public Config {
  public:
-  PbConfig(const std::string& type_name, const std::string& full_type_name) : type_name_(type_name), full_type_name_(full_type_name) {}
+  PbConfig(const std::string& type_name, const std::string& full_type_name)
+      : type_name_(type_name), full_type_name_(full_type_name) {}
   virtual ~PbConfig() {}
 
   const std::string& type_name() const { return type_name_; }
@@ -32,4 +41,4 @@ class PbConfig : public Config {
   std::string full_type_name_ = "pbconfig::PbConfig";
 };
 
-}
+}  // namespace pbconfig

@@ -21,10 +21,7 @@ class JsonParser: public Parser {
 
   template <typename T>
   static
-  typename std::enable_if<std::is_same<int32_t, T>::value || std::is_same<uint32_t, T>::value
-      || std::is_same<int64_t, T>::value || std::is_same<uint64_t, T>::value
-      || std::is_same<float, T>::value || std::is_same<double, T>::value
-      || std::is_same<std::string, T>::value || std::is_same<bool, T>::value, bool>::type
+  typename std::enable_if<FieldType<T>::value, bool>::type
   Parse(const rapidjson::Value& json_config, const std::string& field_name, T& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
@@ -40,10 +37,7 @@ class JsonParser: public Parser {
 
   template <typename T>
   static
-  typename std::enable_if<!(std::is_same<int32_t, T>::value || std::is_same<uint32_t, T>::value
-      || std::is_same<int64_t, T>::value || std::is_same<uint64_t, T>::value
-      || std::is_same<float, T>::value || std::is_same<double, T>::value
-      || std::is_same<std::string, T>::value || std::is_same<bool, T>::value), bool>::type
+  typename std::enable_if<!FieldType<T>::value, bool>::type
   Parse(const rapidjson::Value& json_config, const std::string& field_name, T& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
@@ -58,10 +52,7 @@ class JsonParser: public Parser {
 
   template <typename T>
   static
-  typename std::enable_if<std::is_same<int32_t, T>::value || std::is_same<uint32_t, T>::value
-      || std::is_same<int64_t, T>::value || std::is_same<uint64_t, T>::value
-      || std::is_same<float, T>::value || std::is_same<double, T>::value
-      || std::is_same<std::string, T>::value || std::is_same<bool, T>::value, bool>::type
+  typename std::enable_if<FieldType<T>::value, bool>::type
   Parse(rapidjson::Value& json_config, const std::string& field_name, std::vector<T>& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
@@ -82,10 +73,7 @@ class JsonParser: public Parser {
 
   template <typename T>
   static
-  typename std::enable_if<!(std::is_same<int32_t, T>::value || std::is_same<uint32_t, T>::value
-      || std::is_same<int64_t, T>::value || std::is_same<uint64_t, T>::value
-      || std::is_same<float, T>::value || std::is_same<double, T>::value
-      || std::is_same<std::string, T>::value || std::is_same<bool, T>::value), bool>::type
+  typename std::enable_if<!FieldType<T>::value, bool>::type
   Parse(rapidjson::Value& json_config, const std::string& field_name, std::vector<T>& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
@@ -101,6 +89,16 @@ class JsonParser: public Parser {
       }
       config_value.emplace_back(*arr_value);
     }
+    return true;
+  }
+
+  template <typename T>
+  static
+  typename std::enable_if<FieldType<T>::value, bool>::type
+  Serialize(const std::string& field_name, const T& config_value, rapidjson::Value& json_config, rapidjson::Value::AllocatorType& allocator) {
+    rapidjson::Value json_field;
+    json_field.Set(config_value, allocator);
+    json_config.AddMember(rapidjson::Value(field_name, allocator), json_field, allocator);
     return true;
   }
 

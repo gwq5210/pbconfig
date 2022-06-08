@@ -1,8 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "proto/person.cfg.h"
-#include "json_parser.h"
 #include "io_util.h"
+#include "json_parser.h"
+#include "proto/person.cfg.h"
+
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 TEST(JsonParserTest, JsonParserTest) {
   Person person;
@@ -25,5 +30,15 @@ TEST(JsonParserTest, JsonParserTest) {
     for (auto& address : person.address_list) {
       fmt::print("address {}\n", address.province);
     }
+  }
+  {
+    rapidjson::Value::AllocatorType allocator;
+    rapidjson::Value json_config(rapidjson::kObjectType);
+    pbconfig::JsonParser::Serialize("name", person.name, json_config, allocator);
+    pbconfig::JsonParser::Serialize("age", person.age, json_config, allocator);
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json_config.Accept(writer);
+    fmt::print("json: {}\n", buffer.GetString());
   }
 }
