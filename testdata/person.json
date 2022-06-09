@@ -1,19 +1,19 @@
 {
-  "name": "gwq",
-  "age": 29,
-  "address": {
-    "province": "henan"
-  },
-  "phone_number": [
-    "1",
-    "2"
-  ],
-  "address_list": [
-    {
-      "province": "henan1"
+    "name": "gwq",
+    "age": 29,
+    "address": {
+        "province": "henan"
     },
-    {
-      "province": "henan2"
-    }
-  ]
+    "phone_number": [
+        "1",
+        "2"
+    ],
+    "address_list": [
+        {
+            "province": "henan1"
+        },
+        {
+            "province": "henan2"
+        }
+    ]
 }

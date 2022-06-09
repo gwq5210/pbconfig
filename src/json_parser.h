@@ -2,17 +2,18 @@
 
 #include <rapidjson/document.h>
 
-#include <cassert>
-#include <unordered_map>
-#include <functional>
 #include <spdlog/spdlog.h>
+#include <cassert>
+#include <functional>
 #include <type_traits>
+#include <unordered_map>
+
 
 #include "parser.h"
 
 namespace pbconfig {
 
-class JsonParser: public Parser {
+class JsonParser : public Parser {
  public:
   static JsonParser& GetInstance() {
     static JsonParser instance;
@@ -20,9 +21,9 @@ class JsonParser: public Parser {
   }
 
   template <typename T>
-  static
-  typename std::enable_if<FieldType<T>::value, bool>::type
-  Parse(const rapidjson::Value& json_config, const std::string& field_name, T& config_value) {
+  static typename std::enable_if<FieldType<T>::value, bool>::type Parse(const rapidjson::Value& json_config,
+                                                                        const std::string& field_name,
+                                                                        T& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
       return false;
@@ -36,9 +37,9 @@ class JsonParser: public Parser {
   }
 
   template <typename T>
-  static
-  typename std::enable_if<!FieldType<T>::value, bool>::type
-  Parse(const rapidjson::Value& json_config, const std::string& field_name, T& config_value) {
+  static typename std::enable_if<!FieldType<T>::value, bool>::type Parse(const rapidjson::Value& json_config,
+                                                                         const std::string& field_name,
+                                                                         T& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
       return false;
@@ -51,9 +52,9 @@ class JsonParser: public Parser {
   }
 
   template <typename T>
-  static
-  typename std::enable_if<FieldType<T>::value, bool>::type
-  Parse(rapidjson::Value& json_config, const std::string& field_name, std::vector<T>& config_value) {
+  static typename std::enable_if<FieldType<T>::value, bool>::type Parse(const rapidjson::Value& json_config,
+                                                                        const std::string& field_name,
+                                                                        std::vector<T>& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
       return false;
@@ -72,9 +73,9 @@ class JsonParser: public Parser {
   }
 
   template <typename T>
-  static
-  typename std::enable_if<!FieldType<T>::value, bool>::type
-  Parse(rapidjson::Value& json_config, const std::string& field_name, std::vector<T>& config_value) {
+  static typename std::enable_if<!FieldType<T>::value, bool>::type Parse(const rapidjson::Value& json_config,
+                                                                         const std::string& field_name,
+                                                                         std::vector<T>& config_value) {
     auto it = json_config.FindMember(field_name);
     if (it == json_config.MemberEnd()) {
       return false;
@@ -87,17 +88,57 @@ class JsonParser: public Parser {
       if (!arr_value->IsObject()) {
         continue;
       }
-      config_value.emplace_back(*arr_value);
+      T item;
+      item.ParseFromJsonValue(*arr_value);
+      config_value.emplace_back(std::move(item));
     }
     return true;
   }
 
   template <typename T>
-  static
-  typename std::enable_if<FieldType<T>::value, bool>::type
-  Serialize(const std::string& field_name, const T& config_value, rapidjson::Value& json_config, rapidjson::Value::AllocatorType& allocator) {
+  static typename std::enable_if<FieldType<T>::value, bool>::type Serialize(
+      const std::string& field_name, const T& config_value, rapidjson::Value& json_config,
+      rapidjson::Value::AllocatorType& allocator) {
     rapidjson::Value json_field;
     json_field.Set(config_value, allocator);
+    json_config.AddMember(rapidjson::Value(field_name, allocator), json_field, allocator);
+    return true;
+  }
+
+  template <typename T>
+  static typename std::enable_if<!FieldType<T>::value, bool>::type Serialize(
+      const std::string& field_name, const T& config_value, rapidjson::Value& json_config,
+      rapidjson::Value::AllocatorType& allocator) {
+    rapidjson::Value json_field(rapidjson::kObjectType);
+    config_value.SerializeToJsonValue(json_field, allocator);
+    json_config.AddMember(rapidjson::Value(field_name, allocator), json_field, allocator);
+    return true;
+  }
+
+  template <typename T>
+  static typename std::enable_if<FieldType<T>::value, bool>::type Serialize(
+      const std::string& field_name, const std::vector<T>& config_value, rapidjson::Value& json_config,
+      rapidjson::Value::AllocatorType& allocator) {
+    rapidjson::Value json_field(rapidjson::kArrayType);
+    for (auto& v : config_value) {
+      rapidjson::Value item;
+      item.Set(v, allocator);
+      json_field.PushBack(item, allocator);
+    }
+    json_config.AddMember(rapidjson::Value(field_name, allocator), json_field, allocator);
+    return true;
+  }
+
+  template <typename T>
+  static typename std::enable_if<!FieldType<T>::value, bool>::type Serialize(
+      const std::string& field_name, const std::vector<T>& config_value, rapidjson::Value& json_config,
+      rapidjson::Value::AllocatorType& allocator) {
+    rapidjson::Value json_field(rapidjson::kArrayType);
+    for (auto& v : config_value) {
+      rapidjson::Value item(rapidjson::kObjectType);
+      v.SerializeToJsonValue(item, allocator);
+      json_field.PushBack(item, allocator);
+    }
     json_config.AddMember(rapidjson::Value(field_name, allocator), json_field, allocator);
     return true;
   }
@@ -109,4 +150,4 @@ class JsonParser: public Parser {
   virtual ~JsonParser() {}
 };
 
-}
+}  // namespace pbconfig
